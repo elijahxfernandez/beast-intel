@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beast Intelligence — YouTube Analytics Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root[data-theme="dark"]{--bg:#0a0a0a;--surface:#111;--surface2:#161616;--border:#1e1e1e;--border2:#2a2a2a;--text:#e8e8e8;--text2:#aaa;--muted:#555;--input-bg:#1a1a1a;--shadow:0 4px 24px rgba(0,0,0,.5);}
+:root[data-theme="light"]{--bg:#f4f4f0;--surface:#fff;--surface2:#f9f9f7;--border:#e0e0d8;--border2:#ccccc4;--text:#111;--text2:#555;--muted:#999;--input-bg:#f0f0ec;--shadow:0 4px 24px rgba(0,0,0,.08);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;transition:background .3s,color .3s;}
+header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:26px;height:26px;background:#FF0000;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:10px;color:white;}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;}
+.logo-text span{color:#FF0000;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.status-pill{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:4px 10px;border-radius:20px;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#00e676;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.btn{font-family:'DM Mono',monospace;font-size:11px;background:none;border:1px solid var(--border2);color:var(--text2);padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .2s;}
+.btn:hover{border-color:#FF0000;color:#FF0000;}
+.btn.primary{background:#FF0000;border-color:#FF0000;color:#fff;}
+.btn.primary:hover{background:#cc0000;color:#fff;}
+.theme-btn{width:32px;height:32px;border-radius:6px;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;}
+.controls-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.cg{display:flex;align-items:center;gap:8px;}
+.cl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.ci{font-family:'DM Mono',monospace;font-size:12px;background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:4px;outline:none;transition:border .2s;}
+.ci:focus{border-color:#FF0000;}
+.ci::placeholder{color:var(--muted);}
+.sw{display:flex;gap:6px;flex:1;min-width:200px;max-width:320px;}
+.sw input{flex:1;}
+.divider{width:1px;height:24px;background:var(--border);}
+main{max-width:1440px;margin:0 auto;padding:28px;}
+.sl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sl::after{content:'';flex:1;height:1px;background:var(--border);}
+section{margin-bottom:36px;opacity:0;transform:translateY(12px);animation:fu .45s ease forwards;}
+section:nth-child(2){animation-delay:.1s;}section:nth-child(3){animation-delay:.2s;}
+section:nth-child(4){animation-delay:.3s;}section:nth-child(5){animation-delay:.4s;}
+@keyframes fu{to{opacity:1;transform:translateY(0);}}
+.hero-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.hs{background:var(--surface);padding:24px 20px;transition:background .2s;}
+.hs:hover{background:var(--surface2);}
+.hl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.hv{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;margin-bottom:4px;}
+.hv.red{color:#FF0000;}.hv.grn{color:#00e676;}
+.hsub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;}
+.ch-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.ch-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--cc,#FF0000);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.ch-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.ch-card:hover::before,.ch-card.active::before{transform:scaleX(1);}
+.ch-card.active{border-color:var(--cc,#FF0000);}
+.ch-card.custom{border-style:dashed;}
+.ch-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.ch-av{width:38px;height:38px;border-radius:50%;background:var(--border2);border:2px solid var(--cc,var(--border2));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;overflow:hidden;}
+.ch-gr{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;}
+.ch-nm{font-size:14px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ch-ni{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;}
+.ch-st{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cs-l{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.cs-v{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;}
+.tier-b{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-top:10px;}
+.tf{background:rgba(255,0,0,.12);color:#FF0000;}.tc{background:rgba(128,128,128,.1);color:var(--muted);}.tcu{background:rgba(0,188,212,.12);color:#00BCD4;}
+.rm-btn{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--border2);border:none;color:var(--muted);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+.ch-card:hover .rm-btn{opacity:1;}.rm-btn:hover{background:#FF0000;color:#fff;}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:22px;}
+.ct{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+.cw{position:relative;height:240px;}
+.it{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:12px;}
+.it thead tr{border-bottom:1px solid var(--border2);}
+.it th{text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 14px;font-weight:400;}
+.it th:not(:first-child){text-align:right;}
+.it tbody tr{border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;}
+.it tbody tr:hover{background:var(--surface2);}
+.it tbody tr.fr{background:rgba(255,0,0,.03);}
+.it td{padding:12px 14px;}.it td:not(:first-child){text-align:right;}
+.chc{display:flex;align-items:center;gap:8px;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.bc{display:flex;align-items:center;justify-content:flex-end;gap:8px;}
+.mb{height:3px;border-radius:2px;background:var(--border2);width:60px;overflow:hidden;}
+.mbf{height:100%;border-radius:2px;transition:width 1s ease;}
+.v-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;}
+.vc{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px;transition:border-color .2s;}
+.vc:hover{border-color:var(--border2);}
+.vch{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.vt{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.vm{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.vv{color:#00e676;}
+.empty{text-align:center;padding:48px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;}
+.lo{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;}
+.lo.hidden{opacity:0;pointer-events:none;}
+.ll{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:4px;}.ll span{color:#FF0000;}
+.lb{width:180px;height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
+.lbf{height:100%;background:#FF0000;border-radius:2px;animation:load 1.8s ease-in-out infinite;}
+@keyframes load{0%{width:0%;margin-left:0%;}50%{width:60%;margin-left:20%;}100%{width:0%;margin-left:100%;}}
+.lm{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:10px 16px;border-radius:6px;box-shadow:var(--shadow);z-index:1000;transform:translateY(20px);opacity:0;transition:all .3s;}
+.toast.show{transform:translateY(0);opacity:1;}.toast.s{border-color:#00e676;color:#00e676;}.toast.e{border-color:#FF0000;color:#FF0000;}
+footer{border-top:1px solid var(--border);padding:18px 28px;display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr 1fr;}.charts-grid{grid-template-columns:1fr;}main{padding:16px;}.controls-bar{padding:10px 16px;}}
+</style>
+</head>
+<body>
+<div class="lo" id="lo"><div class="ll">BEAST <span>INTEL</span></div><div class="lb"><div class="lbf"></div></div><div class="lm" id="lm">FETCHING DATA...</div></div>
+<div class="toast" id="toast"></div>
+<header>
+  <div class="logo"><div class="logo-mark">BI</div><div class="logo-text">BEAST <span>INTEL</span></div></div>
+  <div class="header-right">
+    <div class="status-pill"><div class="status-dot"></div><span id="lastUpdated">LOADING...</span></div>
+    <button class="btn" onclick="exportCSV()">↓ CSV</button>
+    <button class="btn" onclick="refreshData()">↺ REFRESH</button>
+    <div class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</div>
+  </div>
+</header>
+<div class="controls-bar">
+  <div class="cg"><span class="cl">Add Channel</span>
+    <div class="sw"><input class="ci" id="si" type="text" placeholder="@handle e.g. veritasium" onkeydown="if(event.key==='Enter')addChannel()"><button class="btn primary" onclick="addChannel()">+ ADD</button></div>
+  </div>
+  <div class="divider"></div>
+  <div class="cg"><span class="cl">Niche</span><select class="ci" id="nf" onchange="applyFilters()"><option value="">All Niches</option></select></div>
+  <div class="cg"><span class="cl">Tier</span>
+    <select class="ci" id="tf" onchange="applyFilters()">
+      <option value="">All Tiers</option><option value="focus">Focus</option><option value="competitor">Competitor</option><option value="custom">Custom</option>
+    </select>
+  </div>
+  <div class="divider"></div>
+  <div class="cg"><span class="cl">From</span><input class="ci" id="df" type="date" onchange="applyFilters()"></div>
+  <div class="cg"><span class="cl">To</span><input class="ci" id="dt" type="date" onchange="applyFilters()"></div>
+  <button class="btn" onclick="clearFilters()" style="margin-left:auto">✕ CLEAR</button>
+</div>
+<main>
+  <section>
+    <div class="sl">Overview</div>
+    <div class="hero-grid">
+      <div class="hs"><div class="hl">MrBeast Subscribers</div><div class="hv red" id="hS">—</div><div class="hsub">YouTube's #1 channel</div></div>
+      <div class="hs"><div class="hl">Total Views</div><div class="hv" id="hV">—</div><div class="hsub">lifetime</div></div>
+      <div class="hs"><div class="hl">Social Blade Grade</div><div class="hv grn" id="hG">—</div><div class="hsub">platform ranking</div></div>
+      <div class="hs"><div class="hl">Sub Lead vs Avg Competitor</div><div class="hv red" id="hL">—</div><div class="hsub">times larger</div></div>
+    </div>
+  </section>
+  <section>
+    <div class="sl">Channels Tracked (<span id="chCount">0</span>)</div>
+    <div class="ch-grid" id="chGrid"></div>
+  </section>
+  <section>
+    <div class="sl">Comparative Analysis</div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="ct">Subscriber Count</div><div class="cw"><canvas id="sc"></canvas></div></div>
+      <div class="chart-card"><div class="ct">Avg Views Per Video</div><div class="cw"><canvas id="vc2"></canvas></div></div>
+    </div>
+  </section>
+  <section>
+    <div class="sl">Competitive Benchmark</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;overflow-x:auto;">
+      <table class="it"><thead><tr><th>Channel</th><th>Niche</th><th>Subscribers</th><th>Total Views</th><th>Avg Views/Video</th><th>Videos</th><th>Grade</th></tr></thead>
+      <tbody id="bTable"></tbody></table>
+    </div>
+  </section>
+  <section>
+    <div class="sl">Recent Uploads</div>
+    <div class="v-grid" id="vGrid"></div>
+  </section>
+</main>
+<footer><span>BEAST INTEL · YouTube Intelligence Dashboard</span><span>Data: Curated public stats · Built for Beast Industries analyst role</span></footer>
+<script>
+let allCh=[],sc,vc2,dark=true;
+const cb=()=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:dark?'#1a1a1a':'#fff',borderColor:dark?'#2a2a2a':'#ddd',borderWidth:1,titleColor:'#888',bodyColor:dark?'#e8e8e8':'#111',titleFont:{family:'DM Mono',size:10},bodyFont:{family:'DM Mono',size:12},callbacks:{label:c=>' '+fn(c.raw)}}},scales:{x:{grid:{color:dark?'#1a1a1a':'#eee'},ticks:{color:'#888',font:{family:'DM Mono',size:10},maxRotation:30}},y:{grid:{color:dark?'#1a1a1a':'#eee'},ticks:{color:'#888',font:{family:'DM Mono',size:10},callback:v=>v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(0)+'M':v}}}});
+function fn(n){if(n>=1e9)return(n/1e9).toFixed(1)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(n||0);}
+function toast(msg,t='s'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.className='toast',3000);}
+function toggleTheme(){dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.getElementById('themeBtn').textContent=dark?'🌙':'☀️';if(allCh.length)renderCharts(allCh);}
+async function loadData(p=''){
+  try{
+    document.getElementById('lm').textContent='FETCHING DATA...';
+    const [cr,sr,nr]=await Promise.all([fetch('/api/channels'+p),fetch('/api/summary'),fetch('/api/niches')]);
+    allCh=await cr.json();const sum=await sr.json();const niches=await nr.json();
+    document.getElementById('hS').textContent=sum.mrbeast_subs||'—';
+    document.getElementById('hV').textContent=sum.mrbeast_views||'—';
+    document.getElementById('hG').textContent=sum.mrbeast_grade||'—';
+    document.getElementById('hL').textContent=sum.sub_lead_vs_avg_competitor||'—';
+    document.getElementById('lastUpdated').textContent=sum.last_updated||'LIVE';
+    document.getElementById('chCount').textContent=allCh.length;
+    const sel=document.getElementById('nf'),cur=sel.value;
+    sel.innerHTML='<option value="">All Niches</option>';
+    niches.forEach(n=>{const o=document.createElement('option');o.value=n.toLowerCase();o.textContent=n;if(n.toLowerCase()===cur)o.selected=true;sel.appendChild(o);});
+    renderCards(allCh);renderCharts(allCh);renderTable(allCh);renderVideos(allCh);
+    document.getElementById('lo').classList.add('hidden');
+  }catch(e){console.error(e);document.getElementById('lm').textContent='ERROR';setTimeout(()=>document.getElementById('lo').classList.add('hidden'),2000);}
+}
+function renderCards(chs){
+  document.getElementById('chGrid').innerHTML=chs.map(ch=>`
+    <div class="ch-card ${ch.tier==='custom'?'custom':''} ${ch.tier==='focus'?'active':''}" style="--cc:${ch.color}" onclick="window.open('${ch.yt_url}','_blank')">
+      ${ch.tier==='custom'?`<button class="rm-btn" onclick="event.stopPropagation();removeCh('${ch.handle}')">✕</button>`:''}
+      <div class="ch-hdr"><div class="ch-av" style="border-color:${ch.color};color:${ch.color}">${ch.name[0]}</div><div class="ch-gr" style="color:${ch.color}">${ch.grade||'—'}</div></div>
+      <div class="ch-nm">${ch.name}</div><div class="ch-ni">${ch.niche}</div>
+      <div class="ch-st">
+        <div><div class="cs-l">Subs</div><div class="cs-v">${ch.subscribers_fmt||'—'}</div></div>
+        <div><div class="cs-l">Total Views</div><div class="cs-v">${ch.total_views_fmt||'—'}</div></div>
+        <div><div class="cs-l">Videos</div><div class="cs-v">${(ch.video_count||0).toLocaleString()}</div></div>
+        <div><div class="cs-l">Avg/Video</div><div class="cs-v">${ch.avg_views_fmt||'—'}</div></div>
+      </div>
+      <span class="tier-b ${ch.tier==='focus'?'tf':ch.tier==='custom'?'tcu':'tc'}">${ch.tier}</span>
+    </div>`).join('');
+}
+function renderCharts(chs){
+  const lb=chs.map(c=>c.name),co=chs.map(c=>c.color);
+  if(sc)sc.destroy();sc=new Chart(document.getElementById('sc'),{type:'bar',data:{labels:lb,datasets:[{data:chs.map(c=>c.subscribers||0),backgroundColor:co.map(c=>c+'33'),borderColor:co,borderWidth:2,borderRadius:3}]},options:cb()});
+  if(vc2)vc2.destroy();vc2=new Chart(document.getElementById('vc2'),{type:'bar',data:{labels:lb,datasets:[{data:chs.map(c=>c.avg_views_per_video||0),backgroundColor:co.map(c=>c+'33'),borderColor:co,borderWidth:2,borderRadius:3}]},options:cb()});
+}
+function renderTable(chs){
+  const ms=Math.max(...chs.map(c=>c.subscribers||0)),mv=Math.max(...chs.map(c=>c.avg_views_per_video||0));
+  document.getElementById('bTable').innerHTML=chs.map(ch=>`
+    <tr class="${ch.tier==='focus'?'fr':''}" onclick="window.open('${ch.yt_url}','_blank')">
+      <td><div class="chc"><div class="dot" style="background:${ch.color}"></div><strong>${ch.name}</strong></div></td>
+      <td style="font-size:10px;color:var(--muted)">${ch.niche}</td>
+      <td><div class="bc">${ch.subscribers_fmt||'—'}<div class="mb"><div class="mbf" style="width:${((ch.subscribers||0)/ms*100).toFixed(0)}%;background:${ch.color}"></div></div></div></td>
+      <td>${ch.total_views_fmt||'—'}</td>
+      <td><div class="bc">${ch.avg_views_fmt||'—'}<div class="mb"><div class="mbf" style="width:${((ch.avg_views_per_video||0)/mv*100).toFixed(0)}%;background:${ch.color}"></div></div></div></td>
+      <td>${(ch.video_count||0).toLocaleString()}</td>
+      <td style="color:${ch.color};font-weight:500">${ch.grade||'—'}</td>
+    </tr>`).join('');
+}
+function renderVideos(chs){
+  const vids=[];chs.forEach(ch=>(ch.recent_videos||[]).forEach(v=>vids.push({...v,channel:ch.name,color:ch.color})));
+  vids.sort(()=>Math.random()-.5);
+  const g=document.getElementById('vGrid');
+  if(!vids.length){g.innerHTML='<div class="empty">No videos match current filters.</div>';return;}
+  g.innerHTML=vids.slice(0,12).map(v=>`<div class="vc"><div class="vch" style="color:${v.color}">${v.channel}</div><div class="vt">${v.title}</div><div class="vm"><span class="vv">${v.views} views</span><span>${v.published}</span></div></div>`).join('');
+}
+function applyFilters(){
+  const p=new URLSearchParams();
+  const n=document.getElementById('nf').value,t=document.getElementById('tf').value,f=document.getElementById('df').value,to=document.getElementById('dt').value;
+  if(n)p.set('niche',n);if(t)p.set('tier',t);if(f)p.set('date_from',f);if(to)p.set('date_to',to);
+  loadData(p.toString()?'?'+p.toString():'');
+}
+function clearFilters(){['nf','tf','df','dt'].forEach(id=>document.getElementById(id).value='');loadData();}
+async function addChannel(){
+  const inp=document.getElementById('si'),h=inp.value.trim().replace('@','');
+  if(!h){toast('Enter a handle first','e');return;}
+  toast('Adding @'+h+'...');
+  try{
+    const r=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({handle:h})});
+    const d=await r.json();
+    if(d.error){toast(d.error,'e');return;}
+    if(d.status==='already_tracked'){toast('@'+h+' already tracked','e');return;}
+    toast('✓ Added '+d.channel.name);inp.value='';loadData();
+  }catch(e){toast('Failed to add channel','e');}
+}
+async function removeCh(h){
+  await fetch('/api/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({handle:h})});
+  toast('Removed @'+h);loadData();
+}
+function exportCSV(){
+  const n=document.getElementById('nf').value,t=document.getElementById('tf').value;
+  const p=new URLSearchParams();if(n)p.set('niche',n);if(t)p.set('tier',t);
+  window.location.href='/api/export/csv'+(p.toString()?'?'+p.toString():'');
+  toast('↓ Downloading CSV...');
+}
+async function refreshData(){await fetch('/api/refresh');loadData();toast('↺ Refreshed');}
+loadData();
+</script>
+</body>
+</html>
